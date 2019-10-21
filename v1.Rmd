@@ -1,0 +1,148 @@
+---
+title: "mid_project"
+author: "xiaofei_wu"
+date: "2019/10/21"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r questionarie}
+# Packages to be used
+library(readxl)
+library(tidyverse)
+library(tidyr)
+
+# install.packages("corpcor")
+# install.packages("GPArotation")
+# install.packages("psych")
+library(corpcor);
+library(GPArotation);
+library(psych)
+
+# read num data
+data<-read_excel("F00007625-WV6_Data_Taiwan_2012_Excel_v20180912.xlsx")
+my_data <- as_tibble(data)
+data1<-data%>%select(5,6,7,8,9,10,11,12,24,62,106:111,161,162,163,306,307,308)
+head(data1)
+
+# Correlations between variables
+raqMatrix <- cor(data1)
+# head(round(raqMatrix, 2))    
+
+# Then, run Bartlett’s test on the correlation matrix by using cortest.bartlett() from
+# psych package.
+cortest.bartlett(data1)
+
+# For these data, Bartlett’s test is highly signicant,  p < .001, and
+# therefore factor analysis is appropriate.
+# Then, we could get the determinant:
+det(raqMatrix)
+# This value is greater than the necessary value of 0.00001 (see section 17.5). As such, our
+# determinant does not seem problematic.
+
+pc1 <- principal(data1, nfactors=22, rotate="none")
+plot(pc1$values, type="b") 
+
+# From the scree plot, we could nd the point of inexion (around the third point to the
+# le). The evidence from the scree plot and from the eigenvalues suggests a
+# fourcomponent solution may be the best.
+
+
+# Redo PCA
+# rerun the analysis, change nfactors = 23 to be nfactors = 4 because we now want
+# only six factors.
+pc2 <- principal(data1, nfactors=4, rotate="none")
+
+# In this case, we will select oblique rotation (rotate = “oblimin”) 
+# as we believe that there is correlation in the factors. 
+# We will use `Ordinary Least Squared/Minres` factoring (fm = “minres”), as it is known to
+# provide results similar to `Maximum Likelihood` without assuming multivariate normal distribution and
+# derives solutions through iterative eigendecomposition like principal axis.
+
+fourfactor <- fa(data1,nfactors = 4,rotate = "oblimin",fm="minres")
+print(fourfactor)
+
+print(fourfactor$loadings,cutoff = 0.3)
+
+# The root mean square of residuals (RMSR) is 0.04. This is acceptable as this value should be closer to 0.
+# Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.07 shows
+# not good model fit as it’s beyond 0.05.
+
+```
+
+```{r}
+
+fivefactor <- fa(data1,nfactors = 5,rotate = "oblimin",fm="minres")
+print(fivefactor)
+
+print(fivefactor$loadings,cutoff = 0.3)
+# Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.066 shows
+# not good model fit as it’s beyond 0.05.
+```
+
+```{r}
+
+sixfactor <- fa(data1,nfactors = 6,rotate = "oblimin",fm="minres")
+print(sixfactor)
+
+print(sixfactor$loadings,cutoff = 0.3)
+# Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.052 shows
+# not good model fit as it’s beyond 0.05.
+```
+
+```{r}
+
+sevenfactor <- fa(data1,nfactors = 7,rotate = "oblimin",fm="minres")
+print(sevenfactor)
+
+print(sevenfactor$loadings,cutoff = 0.3)
+# Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.047 shows
+# not good model fit as it’s beyond 0.05.
+# Finally, the Tucker-Lewis Index (TLI) is 0.93 – an acceptable value considering it’s over 0.9.
+# Hit the following to look at the factor mapping:
+fa.diagram(fourfactor)
+```
+
+## Including Plots
+
+
+```{r, echo=TRUE}
+# change column name
+
+tw_select_col <- colnames(data1)
+
+tw_select_col <- str_replace_all(tw_select_col,": ","_")
+tw_select_col <- str_replace_all(tw_select_col," ","_")
+colnames(data1) <- tw_select_col
+
+ggplot(data = data1) + 
+    geom_bar(mapping = aes(x = V4_Important_in_life_Family,fill = V5_Important_in_life_Friends))
+
+# view the count for question V4_Important_in_life_Family.
+ggplot(data = data1) +
+geom_bar(mapping=aes(x=as.factor(V4_Important_in_life_Family)))+ 
+      coord_cartesian(xlim=c(0,4))
+
+
+# view the count for each answer of the first 4 questions together. 
+testdf <- data1%>%select(1:4)%>%
+    pivot_longer(cols = 1:4,names_to = "Question",values_to = "answer") %>%
+    filter(answer>=0)
+
+ggplot(testdf)+
+    aes(x = answer)+
+    geom_bar(position = "dodge")+facet_wrap(as.factor(testdf$Question),ncol = 2)
+```
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
