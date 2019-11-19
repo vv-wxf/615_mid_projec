@@ -29,9 +29,9 @@ library(GPArotation);
 library(psych)
 
 # read num data
-data<-read_excel("F00007625-WV6_Data_Taiwan_2012_Excel_v20180912.xlsx")
+data<-read_excel("Data_Taiwan_2012_Excel_v20180912.xlsx")
 my_data <- as_tibble(data)
-data1<-data%>%select(5,6,7,8,9,10,11,12,24,62,106:111,161,162,163,306,307,308)
+data1<-data%>%select(5,6,7,8,9,10,11,12,24,62,106:111,161,162,163,306,307,308,309)
 head(data1)
 
 # Correlations between variables
@@ -69,9 +69,8 @@ pc2 <- principal(data1, nfactors=4, rotate="none")
 # derives solutions through iterative eigendecomposition like principal axis.
 
 fourfactor <- fa(data1,nfactors = 4,rotate = "oblimin",fm="minres")
-print(fourfactor)
-
-print(fourfactor$loadings,cutoff = 0.3)
+# print(fourfactor)
+# print(fourfactor$loadings,cutoff = 0.3)
 
 # The root mean square of residuals (RMSR) is 0.04. This is acceptable as this value should be closer to 0.
 # Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.07 shows
@@ -82,19 +81,19 @@ print(fourfactor$loadings,cutoff = 0.3)
 ```{r}
 
 fivefactor <- fa(data1,nfactors = 5,rotate = "oblimin",fm="minres")
-print(fivefactor)
-
-print(fivefactor$loadings,cutoff = 0.3)
-# Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.066 shows
-# not good model fit as it’s beyond 0.05.
+# print(fivefactor)
+# 
+# print(fivefactor$loadings,cutoff = 0.3)
+# # Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.066 shows
+# # not good model fit as it’s beyond 0.05.
 ```
 
 ```{r}
 
 sixfactor <- fa(data1,nfactors = 6,rotate = "oblimin",fm="minres")
-print(sixfactor)
-
-print(sixfactor$loadings,cutoff = 0.3)
+# print(sixfactor)
+# 
+# print(sixfactor$loadings,cutoff = 0.3)
 # Next we should check RMSEA (root mean square error of approximation) index. Its value, 0.052 shows
 # not good model fit as it’s beyond 0.05.
 ```
